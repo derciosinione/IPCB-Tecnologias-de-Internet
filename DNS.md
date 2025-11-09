@@ -1,88 +1,87 @@
-🧩 1️⃣ Verificar se a firewall (UFW) está ativa
 
-sudo ufw status
 
-⚙️ 2️⃣ Desligar a firewall
+1) Configuração do servidor primário do domínio de topo “cb”
 
-Para desativar completamente:
-> sudo ufw disable
-
-caso for necessario instalar 
-
+```bash
 sudo apt update
-sudo apt install ufw -y
+sudo apt install bind9 bind9utils bind9-doc -y
+```
 
-# Servidores
-user: server1
-password: root
-ipv4: 192.168.1.73/23
+⚙️ 2️⃣ Editar o ficheiro principal de configuração
 
------
+Abrir:
+```bash
+nano /etc/bind/named.conf.local
+```
 
-user: server2
-password: root
-ipv4: 192.168.1.116/23
-
-----
-
-user: server3
-password: root
-ipv4: 192.168.1.13/23
-
----
-user: ubuntudesktop
-password: root
-ipv4: 192.168.1.111/23^
-
-## Mountar a pasta compartilhada
-
-caso ja tiver tudo configurado
-
+Adicionar no final:
 
 ```bash
-sudo modprobe vboxsf
-sudo mount -t vboxsf VirtualBoxShared /mnt/VirtualBoxShared
+zone "cb" {
+    type master;
+    file "/etc/bind/db.cb";
+};
+```
+
+> Isso diz ao BIND9 que este servidor é o mestre (primário) do domínio “cb” e vai usar o ficheiro de zona /etc/bind/db.cb.
+
+
+🧠 3️⃣ Criar o ficheiro de zona do domínio “cb”
+
+Cria o ficheiro baseado no modelo padrão:
+
+```bash
+cp /etc/bind/db.local /etc/bind/db.cb
+nano /etc/bind/db.cb
+```
+
+Apaga o conteúdo antigo e substitui por:
+
+```bash
+$TTL 20
+@   IN  SOA dns.cb. root.cb. (
+        1        ; Serial
+        10M      ; Refresh (10 minutos)
+        1M       ; Retry (1 minuto)
+        1D       ; Expire (1 dia)
+        20       ; Negative Cache TTL
+)
+; Servidor DNS primário
+    IN  NS   dns.cb.
+; Registo A do servidor DNS
+dns IN  A    192.168.1.73
+
 ```
 
 
-> sudo apt update
-> sudo apt install virtualbox-guest-utils -y
+💡 Explicação:
 
-Then confirm the kernel module is loaded:
-> lsmod | grep vboxsf
+@ representa o domínio “cb”.
 
-If it’s empty, load it manually:
-> sudo modprobe vboxsf
+root.cb. é o email do administrador (equivalente a root@cb).
 
+Os tempos (10M, 1M, etc.) estão nos valores pedidos na ficha.
 
-🧠 2️⃣ Mount the folder manually
+O registo A liga o nome dns.cb ao IP do servidor.
 
-The folder name in your VirtualBox settings is VirtualBoxShared.
-So mount it manually:
+Esta configuracao esta salva na pasta compartilhada e pode ser copiada para o local desejado 
 
 ```bash
-sudo mkdir -p /mnt/VirtualBoxShared
-sudo mount -t vboxsf VirtualBoxShared /mnt/VirtualBoxShared
-ls /mnt/VirtualBoxShared
+cp /mnt/VirtualBoxShared/server1/etc/bind/db.cb /etc/bind/db.cb
 ```
 
-🔐 3️⃣ Fix permissions
+⚙️ 4️⃣ Verificar configuração
 
-Add your user to the vboxsf group:
+Executa:
+
 ```bash
-sudo usermod -aG vboxsf $USER
+named-checkconf
+named-checkzone cb /etc/bind/db.cb
 ```
 
-Then reboot:
-
-Add your user to the vboxsf group:
+🔁 5️⃣ Reiniciar o serviço
 
 ```bash
-sudo reboot
-```
-
-After reboot, try again:
-
-```bash
-ls /mnt/VirtualBoxShared
+systemctl restart bind9
+systemctl enable bind9
 ```

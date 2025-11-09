@@ -1,0 +1,4 @@
+zone "cb" {
+    type master;
+    file "/etc/bind/db.cb";
+};
