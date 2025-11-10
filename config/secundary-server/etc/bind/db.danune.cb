@@ -1,0 +1,40 @@
+;
+; Zona principal do domínio danune.cb
+;
+$TTL 20
+@       IN  SOA   milk.danune.cb. root.milk.danune.cb. (
+                2025111001   ; Serial (AAAA/MM/DD/NN)
+                5M           ; Refresh (5 minutos)
+                1M           ; Retry (1 minuto)
+                1D           ; Expire (1 dia)
+                20           ; TTL (20 segundos)
+)
+        IN  NS    milk.danune.cb.
+        IN  NS    cow.danune.cb.
+
+; Registos A (IPv4 Address)
+
+milk            IN  A   192.168.1.116
+cow             IN  A   192.168.1.13
+dns             IN  A   192.168.1.73
+cliente         IN  A   192.168.1.111
+server1         IN  A   192.168.1.73
+server2         IN  A   192.168.1.116
+server3         IN  A   192.168.1.13
+ubuntudesktop   IN  A   192.168.1.111
+
+; Registos IPv6 - AAAA
+
+dns6            IN  AAAA    2001:db8::73
+milk6           IN  AAAA    2001:db8::116
+cow6            IN  AAAA    2001:db8::13
+client6         IN  AAAA    2001:db8::111
+
+
+
+; -----------------------------
+; Registos CNAME (aliases)
+; -----------------------------
+www             IN  CNAME  milk.danune.cb.
+ftp             IN  CNAME  milk.danune.cb.
+

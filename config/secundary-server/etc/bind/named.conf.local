@@ -1,0 +1,4 @@
+zone "danune.cb" {
+    type master;
+    file "/etc/bind/db.danune.cb";
+};

@@ -1,0 +1,5 @@
+zone "danune.cb" {
+    type slave;
+    masters { 192.168.1.116; };      # IP do servidor primário (milk.danune.cb)
+    file "/var/cache/bind/db.danune.cb";
+};
